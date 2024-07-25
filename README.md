@@ -1,4 +1,4 @@
-threex.vertexanimation
+#threex.vertexanimation
 ======================
 threex.vertexanimation is a [three.js games extension] (http://www.threejsgames.com/extensions/) which provides easy vertex animation. You can see your object move as if it's got a life of its own! You can use it to make the objects in your game bounce, dance or move in funky ways. You can add it in your games to get a [Flubber](http://en.wikipedia.org/wiki/Flubber_(film)) effect. The best part about it is that you can get creative. You can morph or deform your objects to transform them into other objects. It is really fun to experiment with! 
 
@@ -25,7 +25,7 @@ You can install it via script tag
 <script src='threex.vertexanimation.js'></script>
 ```
 
-Or you can install with [bower](http://bower.io/), as you wish.
+Or you can install with [bower](http://bower.io/).
 
 ```bash
 bower install threex.vertexanimation
