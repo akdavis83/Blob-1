@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<link rel="icon" href="https://fav.farm/🔥" />
+<title>Blob 1</title>
+<script src='./examples/vendor/three.js/build/three.js'></script>
+<script src='./examples/vendor/require.js/require.js'></script>
+<script src='./threex.vertexanimation.js'></script>
+<style>
+	.invisible-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .invisible-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999; /* make sure it's on top of other elements */
+    opacity: 0; /* make it invisible */
+    cursor: pointer; /* keep the pointer cursor to indicate it's clickable */
+  }
+</style>
+
+<body style='margin: 0px; background-color: #bbbbbb; overflow: hidden;'>
+	<div class="invisible-button">
+  
+		<button class="invisible-link" onclick="window.location.href='https://akdavis83.github.io/Mirror-Cube-2/';"> </button>
+	<script>
+require([ './examples/bower_components/threex.skymap/package.require.js'
+	], function(){
+	var renderer	= new THREE.WebGLRenderer();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
+
+	var updateFcts	= [];
+	var scene	= new THREE.Scene();
+	var camera	= new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000 )
+	camera.position.z = 3
+	
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		add a skymap							//
+	//////////////////////////////////////////////////////////////////////////////////
+	
+	var mesh	= THREEx.createSkymap('mars')
+	scene.add( mesh );
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		set 3 point lighting						//
+	//////////////////////////////////////////////////////////////////////////////////
+
+	;(function(){
+		// add a ambient light
+		var light	= new THREE.AmbientLight( 0x020202*2 )
+		scene.add( light )
+		// add a light in front
+		var light	= new THREE.DirectionalLight('white', 4)
+		light.position.set(0.5, 0.5, 2)
+		scene.add( light )
+		// add a light behind
+		var light	= new THREE.DirectionalLight('white', 0.75*3)
+		light.position.set(-0.5, -0.5, -2)
+		scene.add( light )		
+	})()
+
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		create an mesh							//
+	//////////////////////////////////////////////////////////////////////////////////	
+	var geometry	= new THREE.SphereGeometry(1, 32,32)
+	var material	= new THREE.MeshPhongMaterial();
+	material.envMap	= THREEx.createTextureCube('skybox')
+	material.envMap.mapping	= new THREE.CubeRefractionMapping()
+	material.opacity	= 0.9
+	material.transparent	= true
+	// material.refractionRatio= 0.9
+	// material.reflectivity	= 1.5
+	material.specular.set('silver')
+	material.color.set('silver')
+	var mesh	= new THREE.Mesh( geometry, material )
+	// mesh.scale.x = 2
+	// mesh.scale.y = 1/2
+	scene.add( mesh )
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Do a vertex animation on this mesh				//
+	//////////////////////////////////////////////////////////////////////////////////
+	
+	// instanciate the animation object
+	var animation	= new THREEx.VertexAnimation(geometry, function(origin, position, delta, now){
+		// here you put your formula, something clever which fit your needs
+		var speed	= 2 + Math.cos(0.2 * now*Math.PI*2)*2;
+		var angle	= speed*now*Math.PI*2 + origin.y*10;
+		var angle	= 5*now*Math.PI*2 + origin.y*15;
+		position.x	= origin.x + Math.cos(angle*0.4)*0.1;
+		position.y	= origin.y + Math.sin(angle*0.1)*0.4;
+		position.z	= origin.z + Math.sin(angle*0.1)*0.3;
+	})
+	// update the animation at every frame
+	updateFcts.push(function(delta, now){
+		animation.update(delta, now)
+	})
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Camera Controls							//
+	//////////////////////////////////////////////////////////////////////////////////
+	var mouse	= {x : 0, y : 0}
+	document.addEventListener('mousemove', function(event){
+		mouse.x	= (event.clientX / window.innerWidth ) - 0.5
+		mouse.y	= (event.clientY / window.innerHeight) - 0.5
+	}, false)
+	updateFcts.push(function(delta, now){
+		camera.position.x += (mouse.x*5 - camera.position.x) * (delta*3)
+		camera.position.y += (mouse.y*5 - camera.position.y) * (delta*3)
+		camera.lookAt( scene.position )
+	})
+
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		render the scene						//
+	//////////////////////////////////////////////////////////////////////////////////
+	updateFcts.push(function(){
+		renderer.render( scene, camera );		
+	})
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		loop runner							//
+	//////////////////////////////////////////////////////////////////////////////////
+	var lastTimeMsec= null
+	requestAnimationFrame(function animate(nowMsec){
+		// keep looping
+		requestAnimationFrame( animate );
+		// measure time
+		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
+		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
+		lastTimeMsec	= nowMsec
+		// call each update function
+		updateFcts.forEach(function(updateFn){
+			updateFn(deltaMsec/1000, nowMsec/1000)
+		})
+	})	
+})
+</script></body>
